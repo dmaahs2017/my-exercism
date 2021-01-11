@@ -1,0 +1,22 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cd rust; find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo build" \;
+    - name: Run tests
+      run: cd rust; find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo test" \;
