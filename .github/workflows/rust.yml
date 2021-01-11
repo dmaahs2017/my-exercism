@@ -17,6 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: cd rust; find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo build" \;
+      run: cd rust && find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo build" \;
     - name: Run tests
-      run: cd rust; find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo test" \;
+      run: cd rust && find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo test" \;
