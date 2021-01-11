@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Use Nightly
+      run: rustup default nightly
     - name: Build
       run: cd rust && find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && cargo build" \;
     - name: Run tests
