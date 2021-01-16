@@ -51,19 +51,15 @@ impl<'a> Hand<'a> {
         }
 
         if let Some(&rank) = three_of_a_kind.first() {
-            return Score::ThreeOfAKind(
-                rank,
-                *threes_kickers.first().unwrap(),
-                *threes_kickers.last().unwrap(),
-            );
+            let fk = *threes_kickers.first().unwrap();
+            let lk = *threes_kickers.last().unwrap();
+            return Score::ThreeOfAKind(rank, fk.max(lk), fk.min(lk));
         }
 
         if pairs.len() == 2 {
-            return Score::TwoPair(
-                *pairs.first().unwrap(),
-                *pairs.last().unwrap(),
-                *pair_kickers.first().unwrap(),
-            );
+            let fp = *pairs.first().unwrap();
+            let lp = *pairs.last().unwrap();
+            return Score::TwoPair(fp.max(lp), fp.min(lp), *pair_kickers.first().unwrap());
         } else if let Some(pair) = pairs.first() {
             return Score::OnePair(*pair);
         }

@@ -9,13 +9,17 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Option<Vec<&'a str>> {
 }
 
 fn get_best_hands(mut hands: Vec<Hand>) -> Option<Vec<Hand>> {
-    hands.sort_by(|a, b| b.score_hand().partial_cmp(&a.score_hand()).unwrap());
-    let first = hands.first().unwrap();
-    Some(
-        hands
-            .iter()
-            .take_while(|&h| h.score_hand() == first.score_hand())
-            .cloned()
-            .collect(),
-    )
+    hands.sort_by(|a, b| b.score_hand().cmp(&a.score_hand()));
+
+    if let Some(first) = hands.first() {
+        Some(
+            hands
+                .iter()
+                .take_while(|&h| h.score_hand() == first.score_hand())
+                .cloned()
+                .collect(),
+        )
+    } else {
+        None
+    }
 }
