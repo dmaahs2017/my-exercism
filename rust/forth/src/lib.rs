@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::fmt;
 
 pub type Value = i32;
 pub type ForthResult = Result<(), Error>;
@@ -25,6 +26,9 @@ impl Forth {
         operators.insert("OVER".to_string(), "OVER".to_string());
         operators.insert("DROP".to_string(), "DROP".to_string());
         operators.insert("SWAP".to_string(), "SWAP".to_string());
+        operators.insert("SUM".to_string(), "SUM".to_string());
+        operators.insert("PRINT".to_string(), "PRINT".to_string());
+        operators.insert("LEN".to_string(), "LEN".to_string());
         operators.insert("+".to_string(), "+".to_string());
         operators.insert("-".to_string(), "-".to_string());
         operators.insert("*".to_string(), "*".to_string());
@@ -39,7 +43,6 @@ impl Forth {
         &self.stack
     }
     fn eval_word(&mut self, word: Word) -> ForthResult {
-        dbg!(&self.operators);
         Ok(match word {
             Word::Operand(v) => self.stack.push(v),
             Word::Operator(s) => {
@@ -66,6 +69,16 @@ impl Forth {
                         let (v1, v2) = self.get_binary_operands()?;
                         self.stack.push(v2);
                         self.stack.push(v1);
+                    }
+                    "SUM" => {
+                        let sum = self.stack.drain(..).sum();
+                        self.stack.push(sum)
+                    }
+                    "LEN" => {
+                        self.stack.push(self.stack.len() as i32)
+                    }
+                    "PRINT" => {
+                        println!("{}", &self)
                     }
                     "+" => {
                         let (v1, v2) = self.get_binary_operands()?;
@@ -150,6 +163,16 @@ impl Forth {
             }
             Ok(v)
         }
+    }
+}
+
+impl fmt::Display for Forth {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut builder = String::new();
+        for v in &self.stack {
+            builder += &format!("{} ", v);
+        }
+        write!(f, "[{}]", builder)
     }
 }
 
