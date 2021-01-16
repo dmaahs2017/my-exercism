@@ -43,6 +43,20 @@ pub enum Suit {
     Spade,
 }
 
+impl TryFrom<char> for Suit {
+    type Error = &'static str;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            'H' => Ok(Suit::Heart),
+            'S' => Ok(Suit::Spade),
+            'C' => Ok(Suit::Club),
+            'D' => Ok(Suit::Diamond),
+            _ => Err("Invalid char conversion to suit."),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

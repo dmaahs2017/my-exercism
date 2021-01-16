@@ -1,16 +1,18 @@
 use crate::card::Rank;
 use std::cmp;
 
+type Kicker = u8;
+
 #[derive(Debug)]
 pub enum Score {
     FiveOfAKind,
     StraightFlush(Rank),
-    FourOfAKind(Rank, Rank), // (FoAK, Kicker)
-    FullHouse(Rank, Rank),
+    FourOfAKind(Rank, Kicker),
+    FullHouse(Rank, Kicker),
     Flush(Vec<Rank>),
     Straight(Rank),
-    ThreeOfAKind(Rank, Rank, Rank), // (ThreeOfAKind, Kicker, Kicker)
-    TwoPair(Rank, Rank, Rank),      //(Pair, Pair, Kicker)
+    ThreeOfAKind(Rank, Kicker, Kicker),
+    TwoPair(Rank, Rank, Kicker),
     OnePair(Rank),
     HighCard(Vec<Rank>),
 }
@@ -179,6 +181,7 @@ impl PartialEq for Score {
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
