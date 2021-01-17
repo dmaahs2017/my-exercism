@@ -327,3 +327,10 @@ fn redefine_an_existing_word_with_another_existing_word() {
     assert!(f.eval("bar foo").is_ok());
     assert_eq!(vec![6, 6], f.stack());
 }
+
+#[test]
+fn fold_0_operands() {
+    let mut f = Forth::new();
+    assert!(f.eval("0 + fold").is_ok());
+    assert_eq!(vec![0], f.stack());
+}

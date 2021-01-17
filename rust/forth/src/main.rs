@@ -1,11 +1,17 @@
-use std::io;
-use std::io::BufRead;
+use std::io::{self, Write };
 use forth::Forth;
 fn main() {
     let mut f = Forth::new();
-    for line in io::stdin().lock().lines() {
-        let line = line.unwrap();
-        f.eval(&line).unwrap();
-        println!("{}", f);
+    let mut buffer = String::new();
+    let stdin = io::stdin();
+    let mut stdout = io::stdout();
+    loop {
+        stdout.write(b"> ").unwrap();
+        stdout.flush().unwrap();
+        stdin.read_line(&mut buffer).unwrap();
+        f.eval(&buffer).unwrap();
+        buffer.clear();
+        println!("{}", &f);
     }
+        
 }
