@@ -235,8 +235,8 @@ fn redefining_an_existing_word() {
 #[test]
 fn redefining_an_existing_built_in_word() {
     let mut f = Forth::new();
-    assert!(f.eval(": swap dup ;").is_ok());
-    assert!(f.eval("1 swap").is_ok());
+    assert_eq!(f.eval(": swap dup ;"), Ok(()));
+    assert_eq!(f.eval("1 swap"), Ok(()));
     assert_eq!(vec![1, 1], f.stack());
 }
 
@@ -306,7 +306,7 @@ fn calling_non_existing_word() {
 #[test]
 fn multiple_definitions() {
     let mut f = Forth::new();
-    assert!(f.eval(": one 1 ; : two 2 ; one two +").is_ok());
+    assert_eq!(f.eval(": one 1 ; : two 2 ; one two +"), Ok(()));
     assert_eq!(vec![3], f.stack());
 }
 
