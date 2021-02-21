@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-const CODON_LEN: usize = 3;
 const STOP_CODON: &str = "stop codon";
 
 pub struct CodonsInfo<'a> {
@@ -8,30 +7,16 @@ pub struct CodonsInfo<'a> {
 
 impl<'a> CodonsInfo<'a> {
     pub fn name_for(&self, codon: &str) -> Option<&'a str> {
-        self.pairs.get(codon).map(|c| *c)
+        self.pairs.get(codon).cloned()
     }
 
     pub fn of_rna(&self, rna: &str) -> Option<Vec<&'a str>> {
-        let mut protiens = Vec::new();
-
-
-        for i in (0..rna.len()).step_by(CODON_LEN) {
-            if i + CODON_LEN > rna.len() {
-                return None;
-            }
-
-            let codon_str = &rna[i..i+CODON_LEN];
-            if let Some(&protien) = self.pairs.get(codon_str) {
-                if protien == STOP_CODON {
-                    break;
-                }
-                protiens.push(protien)
-            } else {
-                return None;
-            }
-        }
-
-        Some(protiens)
+        rna.as_bytes()
+            .chunks(3)
+            .map(std::str::from_utf8)
+            .map(|codon| self.name_for(codon.expect("Invalid Utf8 bytes")))
+            .take_while(|&protien| protien != Some(STOP_CODON))
+            .collect()
     }
 }
 
