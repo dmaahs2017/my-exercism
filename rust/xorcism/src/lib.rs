@@ -1,19 +1,26 @@
+use std::borrow::Borrow;
+
 /// A munger which XORs a key with some data
 #[derive(Clone)]
 pub struct Xorcism<'a> {
-    key: &'a [u8]
-}
+    key: &'a [u8],
+    ptr: usize, //Marks the starting point for the key. Incremented on every use of munge_in_place to make this stateful
 
-impl<'a> Xorcism<'a> 
-{
+}
+pub trait MungeOutput: Iterator<Item = u8> + ExactSizeIterator {}
+impl<T> MungeOutput for T where T: Iterator<Item = u8> + ExactSizeIterator {}
+
+impl<'a> Xorcism<'a> {
     /// Create a new Xorcism munger from a key
     ///
     /// Should accept anything which has a cheap conversion to a byte slice.
-    pub fn new<K>(key: &'a K) -> Xorcism<'a> 
-        where K: AsRef<[u8]> + 'a,
+    pub fn new<K>(key: &'a K) -> Xorcism<'a>
+    where
+        K: AsRef<[u8]> + ?Sized,
     {
         Self {
-            key: key.as_ref()
+            key: key.as_ref(),
+            ptr: 0,
         }
     }
 
@@ -22,17 +29,12 @@ impl<'a> Xorcism<'a>
     /// Note that this is stateful: repeated calls are likely to produce different results,
     /// even with identical inputs.
     pub fn munge_in_place(&mut self, data: &mut [u8]) {
-        let k = self.key.as_ref();
-        let mut k = k.repeat(data.len() / k.len());
-        for (key_byte, data_byte) in k.iter().zip(data.iter_mut()) {
-            *data_byte ^= *key_byte;
+        let mut ptr = self.ptr;
+        for byte in data.iter_mut() {
+            *byte ^= self.key[ptr];
+            inc_ptr_wrapping(&mut ptr, self.key.len());
         }
-
-        let first = k.first().cloned().expect("Key is empty");
-        for i in 0..k.len() - 1 {
-            k[i] = k[i + 1];
-        }
-        *k.last_mut().expect("Key is empty") = first;
+        inc_ptr_wrapping(&mut self.ptr, self.key.len());
     }
 
     /// XOR each byte of the data with a byte from the key.
@@ -42,10 +44,21 @@ impl<'a> Xorcism<'a>
     ///
     /// Should accept anything which has a cheap conversion to a byte iterator.
     /// Shouldn't matter whether the byte iterator's values are owned or borrowed.
-    pub fn munge<Data>(&mut self, data: Data) -> impl Iterator<Item = u8> {
-        unimplemented!();
-        // this empty iterator silences a compiler complaint that
-        // () doesn't implement ExactSizeIterator
-        std::iter::empty()
+    pub fn munge<'b, I, T>(&mut self, data: I) -> impl MungeOutput + 'b
+        where I: IntoIterator<Item=T> + ExactSizeIterator + 'b,
+              T: Borrow<u8> + 'b,
+              'a: 'b
+
+    {
+        let mut ptr = self.ptr;
+        inc_ptr_wrapping(&mut self.ptr, self.key.len());
+        data.into_iter().map(|b| *b.borrow() ^ self.key[ptr])
+
+
+
     }
+}
+
+fn inc_ptr_wrapping(ptr: &mut usize, wrap_at: usize) {
+    *ptr = (*ptr + 1) % wrap_at;
 }
