@@ -8,10 +8,8 @@ where
 {
     pub fn build(sides: [T; 3]) -> Option<Triangle<T>> {
         // check for 0 values
-        for &s in sides.iter() {
-            if s == T::default() {
-                return None;
-            }
+        if sides.iter().any(|&s| s == T::default()) {
+            return None;
         }
 
         // check for 2 sides that aren't >= the remaining side
