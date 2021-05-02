@@ -1,9 +1,8 @@
 #[derive(Debug)]
-pub struct ChessPosition{
+pub struct ChessPosition {
     x: i32,
     y: i32,
 }
-
 
 #[derive(Debug)]
 pub struct Queen {
@@ -12,14 +11,10 @@ pub struct Queen {
 
 impl ChessPosition {
     pub fn new(rank: i32, file: i32) -> Option<Self> {
-        if rank < 0 || rank > 7 || file < 0 || file > 7 {
-            return None;
+        match (rank, file) {
+            (0..=7, 0..=7) => Some(Self { x: rank, y: file }),
+            _ => None,
         }
-
-        Some(Self {
-            x: rank,
-            y: file,
-        })
     }
 
     pub fn slope(&self, other: &Self) -> f32 {
@@ -29,9 +24,7 @@ impl ChessPosition {
 
 impl Queen {
     pub fn new(pos: ChessPosition) -> Self {
-        Self {
-            pos
-        }
+        Self { pos }
     }
 
     pub fn can_attack(&self, other: &Queen) -> bool {
