@@ -1,21 +1,22 @@
 //! I am quite happy with how this solution turned out. I even got to try out some dynamic
 //! dispatch. Though I realize I could've more simply just made a function that did the same thing
 //! as the [Instructions](Instructions) trait
+//!
+//! An advantage of this method is that its more re-usable and extensible. Should the format of the
+//! instructions change all that would need to change is my Instructions trait
 
 /// Converts a string of encoded instructions into an iterator of encoded instructions
 pub trait Instructions: AsRef<str> {
     // Because I wanted to try out dynamic dispatch and didn't want to return a vec
     fn decode_instructions(&self) -> Box<dyn Iterator<Item = Instruction> + '_> {
-            let iter = self.as_ref()
-            .chars()
-            .map(|c| match c {
-                'L' => Instruction::TurnLeft,
-                'R' => Instruction::TurnRight,
-                'A' => Instruction::Advance,
-                _ => panic!("Invalid instructions"),
-            });
+        let iter = self.as_ref().chars().map(|c| match c {
+            'L' => Instruction::TurnLeft,
+            'R' => Instruction::TurnRight,
+            'A' => Instruction::Advance,
+            _ => panic!("Invalid instructions"),
+        });
 
-            Box::new(iter)
+        Box::new(iter)
     }
 }
 impl<T: AsRef<str>> Instructions for T {}
@@ -37,14 +38,13 @@ pub enum Direction {
 }
 
 impl Direction {
-
     /// Get the relative direction to the left of the current dir.
     fn left(&self) -> Direction {
         match self {
             Direction::North => Direction::West,
             Direction::East => Direction::North,
             Direction::South => Direction::East,
-            Direction::West =>  Direction::South,
+            Direction::West => Direction::South,
         }
     }
 
@@ -54,7 +54,7 @@ impl Direction {
             Direction::North => Direction::East,
             Direction::East => Direction::South,
             Direction::South => Direction::West,
-            Direction::West =>  Direction::North,
+            Direction::West => Direction::North,
         }
     }
 }
@@ -82,46 +82,41 @@ impl Robot {
     /// Robot turn right
     pub fn turn_right(self) -> Self {
         Self {
-            pos: self.pos,
             dir: self.dir.right(),
+            ..self
         }
     }
 
     /// Robot turn left
     pub fn turn_left(self) -> Self {
         Self {
-            pos: self.pos,
             dir: self.dir.left(),
+            ..self
         }
     }
 
     /// Advance the robot 1 position in the direction it is facing
-    pub fn advance(self) -> Self {
-        let mut pos = self.pos;
+    pub fn advance(mut self) -> Self {
         match self.dir {
-            Direction::North => pos.y += 1,
-            Direction::East => pos.x += 1,
-            Direction::South => pos.y -= 1,
-            Direction::West => pos.x -= 1,
+            Direction::North => self.pos.y += 1,
+            Direction::East => self.pos.x += 1,
+            Direction::South => self.pos.y -= 1,
+            Direction::West => self.pos.x -= 1,
         };
-        
-        Self {
-            pos,
-            dir: self.dir
-        }
+        self
     }
 
     // Changed the api to AsRef<str> because it's a more ergonomic
     /// Apply a string of instructions to the robot.
     /// Instructions are "LRA", turn left, right and advance respectively.
     pub fn instructions(self, instructions: impl AsRef<str>) -> Self {
-        instructions.decode_instructions().fold(self, |acc, ins| {
-            match ins {
+        instructions
+            .decode_instructions()
+            .fold(self, |acc, ins| match ins {
                 Instruction::TurnRight => acc.turn_right(),
                 Instruction::TurnLeft => acc.turn_left(),
                 Instruction::Advance => acc.advance(),
-            }
-        })
+            })
     }
 
     /// Get the position (x, y) coordinates of the robot
