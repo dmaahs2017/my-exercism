@@ -28,7 +28,7 @@ impl Queen {
     }
 
     pub fn can_attack(&self, other: &Queen) -> bool {
-        let slope = self.pos.slope(&other.pos);
-        slope == 1. || slope == -1. || slope == 0. || slope.is_infinite()
+        let slope = self.pos.slope(&other.pos).abs();
+        slope == 1. || slope == 0. || slope.is_infinite()
     }
 }
