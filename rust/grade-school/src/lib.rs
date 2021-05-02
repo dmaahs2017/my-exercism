@@ -25,7 +25,7 @@ impl School {
     pub fn add(&mut self, grade: Grade, student: &str) {
         self.cohort
             .entry(grade)
-            .or_insert_with(Default::default)
+            .or_default()
             .insert(student.to_string());
     }
 
