@@ -1,31 +1,41 @@
 #[derive(Debug)]
-pub struct ChessPosition;
+pub struct ChessPosition{
+    x: i32,
+    y: i32,
+}
+
 
 #[derive(Debug)]
-pub struct Queen;
+pub struct Queen {
+    pos: ChessPosition,
+}
 
 impl ChessPosition {
     pub fn new(rank: i32, file: i32) -> Option<Self> {
-        unimplemented!(
-            "Construct a ChessPosition struct, given the following rank, file: ({}, {}). If the position is invalid return None.",
-            rank,
-            file
-        );
+        if rank < 0 || rank > 7 || file < 0 || file > 7 {
+            return None;
+        }
+
+        Some(Self {
+            x: rank,
+            y: file,
+        })
+    }
+
+    pub fn slope(&self, other: &Self) -> f32 {
+        (other.y - self.y) as f32 / (other.x - self.x) as f32
     }
 }
 
 impl Queen {
-    pub fn new(position: ChessPosition) -> Self {
-        unimplemented!(
-            "Given the chess position {:?}, construct a Queen struct.",
-            position
-        );
+    pub fn new(pos: ChessPosition) -> Self {
+        Self {
+            pos
+        }
     }
 
     pub fn can_attack(&self, other: &Queen) -> bool {
-        unimplemented!(
-            "Determine if this Queen can attack the other Queen {:?}",
-            other
-        );
+        let slope = self.pos.slope(&other.pos);
+        slope == 1. || slope == -1. || slope == 0. || slope.is_infinite()
     }
 }
