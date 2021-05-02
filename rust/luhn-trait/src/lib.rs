@@ -1,11 +1,4 @@
-pub trait Luhn {
-    fn valid_luhn(&self) -> bool;
-}
-
-impl<T> Luhn for T
-where
-    T: std::fmt::Display,
-{
+pub trait Luhn: ToString {
     fn valid_luhn(&self) -> bool {
         self.to_string()
             .chars()
@@ -20,3 +13,5 @@ where
             .map_or(false, |(sum, count)| sum % 10 == 0 && count > 1)
     }
 }
+
+impl<T: ToString> Luhn for T {}
