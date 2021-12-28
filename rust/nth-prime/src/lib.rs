@@ -11,6 +11,26 @@ pub fn nth(n: u32) -> u32 {
     }
 }
 
+pub fn nth_slow(n: u32) -> u32 {
+    let mut primes = vec![2];
+
+    for num in (3..u32::MAX).step_by(2) {
+        if (n as usize) < primes.len() {
+            return primes[n as usize];
+        }
+        
+        if is_prime(num, &primes) {
+            primes.push(num);
+        }
+    }
+    0
+}
+
+fn is_prime(num: u32, primes: &[u32]) -> bool {
+    // a prime number is one which is not divisible by all of the primes before it
+    primes.iter().all(|p| num % p != 0)
+}
+
 // Function to generate N prime numbers using
 // Sieve of Eratosthenes
 fn sieve_of_eratosthenes(max: usize) -> Vec<u32> {
