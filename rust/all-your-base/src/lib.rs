@@ -7,10 +7,10 @@ pub enum Error {
 
 pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>, Error> {
     if from_base <= 1 {
-        return Err(Error::InvalidInputBase)
+        return Err(Error::InvalidInputBase);
     }
     if to_base <= 1 {
-        return Err(Error::InvalidOutputBase)
+        return Err(Error::InvalidOutputBase);
     }
 
     let mut n = to_base_10(number, from_base)?;
