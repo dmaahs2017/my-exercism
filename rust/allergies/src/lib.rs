@@ -23,7 +23,6 @@ impl Allergies {
     }
 
     pub fn is_allergic_to(&self, allergen: &Allergen) -> bool {
-        dbg!(self.score >> *allergen as u8);
         (self.score >> *allergen as u8) % 2 == 1
     }
 
