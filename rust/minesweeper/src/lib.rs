@@ -1,48 +1,31 @@
-#![feature(unchecked_math)]
-use std::collections::HashSet;
+const MINE_BYTE: u8 = b'*';
 
 pub fn annotate(minefield: &[&str]) -> Vec<String> {
-    let mine_locations = get_mine_locations(minefield);
-
-    minefield
-        .iter()
-        .enumerate()
-        .map(|(i, row)| {
-            row.chars()
-                .enumerate()
-                .map(|(j, letter)| match letter {
-                    '*' => '*',
-                    _ => match count_adjacent_mines((i, j), &mine_locations) {
-                        0 => ' ',
-                        n => std::char::from_digit(n as u32, 10).expect("only valid digits"),
-                    },
+    (0..minefield.len())
+        .map(|row| {
+            (0..minefield[row].len())
+                .map(|col| match minefield[row].as_bytes()[col] {
+                    MINE_BYTE => MINE_BYTE as char,
+                    _ => count_to_print_char(count_mines(minefield, row, col)),
                 })
                 .collect()
         })
         .collect()
 }
 
-fn count_adjacent_mines(pos: (usize, usize), mine_locations: &HashSet<(usize, usize)>) -> usize {
-    (pos.0.saturating_sub(1)..=pos.0 + 1)
-        .flat_map(|row| (pos.1.saturating_sub(1)..=pos.1 + 1).map(move |col| (row, col)))
-        .filter(|pos| mine_locations.contains(pos))
-        .count()
+fn count_to_print_char(count: u8) -> char {
+    match count {
+        0 => ' ',
+        c => (c + b'0') as char,
+    }
 }
 
-fn get_mine_locations(minefield: &[&str]) -> HashSet<(usize, usize)> {
-    minefield
-        .iter()
-        .enumerate()
-        .flat_map(|(i, row)| {
-            row.chars().enumerate().filter_map(
-                move |(j, c)| {
-                    if c == '*' {
-                        Some((i, j))
-                    } else {
-                        None
-                    }
-                },
-            )
+fn count_mines(minefield: &[&str], row: usize, col: usize) -> u8 {
+    (row.saturating_sub(1)..=row + 1)
+        .filter_map(|row| minefield.get(row))
+        .flat_map(|row_string| {
+            (col.saturating_sub(1)..=col + 1).filter_map(move |col| row_string.as_bytes().get(col))
         })
-        .collect()
+        .filter(|c| **c == MINE_BYTE)
+        .count() as u8
 }
