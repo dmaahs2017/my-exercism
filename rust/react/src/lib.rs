@@ -93,12 +93,7 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
         dependencies: &[CellId],
         compute_func: F,
     ) -> Result<ComputeCellId, CellId> {
-        let value = compute_func(
-            &dependencies
-                .iter()
-                .map(|&id| self.value(id).ok_or(id))
-                .collect::<Result<Vec<T>, _>>()?,
-        );
+        let value = compute_func(&self.get_dependency_values(dependencies)?);
         let compute_cell = ComputeCell::new(value, compute_func, dependencies);
         self.compute.push(compute_cell);
         Ok(ComputeCellId(self.compute.len() - 1))
@@ -143,7 +138,9 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
                 .iter()
                 .any(|c| changed.contains(c))
             {
-                let dep_values = self.get_dependency_values(&compute_cell.dependencies);
+                let dep_values = self
+                    .get_dependency_values(&compute_cell.dependencies)
+                    .unwrap();
                 let new_value = (compute_cell.function)(&dep_values);
                 if new_value != compute_cell.value.get() {
                     compute_cell.value.set(new_value);
@@ -160,8 +157,8 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
         true
     }
 
-    fn get_dependency_values(&self, deps: &[CellId]) -> Vec<T> {
-        deps.iter().map(|&id| self.value(id).unwrap()).collect()
+    fn get_dependency_values(&self, deps: &[CellId]) -> Result<Vec<T>, CellId> {
+        deps.iter().map(|&id| self.value(id).ok_or(id)).collect()
     }
 
     // Adds a callback to the specified compute cell.
