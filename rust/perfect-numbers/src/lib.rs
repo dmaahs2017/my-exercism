@@ -18,11 +18,5 @@ pub fn classify(num: u64) -> Option<Classification> {
 }
 
 fn alliquot_sum(num: u64) -> u64 {
-    factors(num).sum()
-}
-
-/// Iterates over factors of num, not including num itself.
-fn factors(num: u64) -> impl Iterator<Item = u64> {
-    // The largest factor can be no greater than num / 2
-    (1..=num / 2).filter(move |x| num % x == 0)
+    (1..=num / 2).filter(|x| num % x == 0).sum()
 }
