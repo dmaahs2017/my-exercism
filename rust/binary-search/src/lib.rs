@@ -11,7 +11,7 @@ where
     let mid = get_mid(slice)?;
     match key.cmp(&slice[mid]) {
         Ordering::Equal => return Some(mid),
-        Ordering::Greater => return Some(1 + mid + find(&slice[mid+1..], key)?),
+        Ordering::Greater => return Some(1 + mid + find(&slice[mid + 1..], key)?),
         Ordering::Less => return find(&slice[..mid], key),
     }
 }
