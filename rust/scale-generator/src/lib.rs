@@ -2,6 +2,7 @@
 pub enum Error {
     InvalidNote(String),
     InvalidTonic(String),
+    InvalidStep(char),
     Undeterminiate,
 }
 
@@ -79,17 +80,17 @@ impl Scale {
         let notes = intervals
             .as_bytes()
             .iter()
-            .fold((root, vec![root]), |(mut note, mut acc), b| {
+            .try_fold((root, vec![root]), |(mut note, mut acc), b| {
                 match b {
                     b'm' => note += 1,
                     b'M' => note += 2,
                     b'A' => note += 3,
-                    _ => unreachable!(),
+                    b => return Err(Error::InvalidStep(*b as char)),
                 }
                 note %= 12;
                 acc.push(note);
-                (note, acc)
-            })
+                Ok((note, acc))
+            })?
             .1;
 
         Ok(Self { flats, notes })
