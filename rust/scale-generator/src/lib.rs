@@ -1,20 +1,12 @@
-#[warn(clippy::unwrap_used, clippy::expect_used)]
 #[derive(Debug, PartialEq)]
 pub enum Error {
     InvalidNote(String),
+    InvalidTonic(String),
     Undeterminiate,
 }
 
 type ScaleResult<T> = Result<T, Error>;
-
 type Notes = [&'static str; 12];
-const SHARPS: Notes = [
-    "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#",
-];
-
-const FLATS: Notes = [
-    "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab",
-];
 
 /// Note is u8 because the note should never exceed 11
 type Note = u8;
@@ -23,7 +15,16 @@ pub struct Scale {
     notes: Vec<Note>,
 }
 
+/// O(1) time, O(1) space
 fn note_string(note: Note, flats: bool) -> String {
+    const SHARPS: Notes = [
+        "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#",
+    ];
+
+    const FLATS: Notes = [
+        "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab",
+    ];
+
     if flats {
         FLATS[note as usize].to_string()
     } else {
@@ -31,6 +32,7 @@ fn note_string(note: Note, flats: bool) -> String {
     }
 }
 
+/// O(1)
 fn string_to_note(note_str: &str) -> ScaleResult<Note> {
     let invalid_note_fn = || Error::InvalidNote(note_str.to_string());
     let mut byte_iter = note_str.as_bytes().iter();
@@ -69,8 +71,9 @@ fn string_to_note(note_str: &str) -> ScaleResult<Note> {
 
 impl Scale {
     // tonic = start note
+    /// O(n) Time, O(n) Space
     pub fn new(tonic: &str, intervals: &str) -> ScaleResult<Scale> {
-        let flats = use_flats(tonic);
+        let flats = use_flats(tonic)?;
         let root = string_to_note(tonic)?;
 
         let notes = intervals
@@ -92,14 +95,16 @@ impl Scale {
         Ok(Self { flats, notes })
     }
 
+    /// O(1) time, O(1) space, since chromatic scales are constant length
     pub fn chromatic(tonic: &str) -> ScaleResult<Self> {
-        let flats = use_flats(tonic);
+        let flats = use_flats(tonic)?;
         let root = string_to_note(tonic)?;
         let notes = (0..12).cycle().skip(root as usize).take(13).collect();
 
         Ok(Scale { flats, notes })
     }
 
+    /// O(n) time, O(n) space
     pub fn enumerate(&self) -> Vec<String> {
         self.notes
             .iter()
@@ -108,12 +113,27 @@ impl Scale {
     }
 }
 
-fn use_flats(tonic: &str) -> bool {
+/// O(1)
+fn use_flats(tonic: &str) -> ScaleResult<bool> {
+    // Upper case indicates Major, lower case indicates minor
+    let not_flats = [
+        // Sharps
+        "G", "D", "A", "E", "B", "F#", "e", "b", "f#", "c#", "g#", "d#",
+        // These scales do not use sharps or flats so it's irrelavant which is used.
+        "C", "a",
+    ];
+
     let flat_tonics = [
         "F", "Bb", "Eb", "Ab", "Db", "Gb", "d", "g", "c", "f", "bb", "eb",
     ];
 
-    flat_tonics.contains(&tonic)
+    // Since these arrays are constant size. Searching them is O(1)
+    let res = flat_tonics.contains(&tonic);
+    if !res && !not_flats.contains(&tonic) {
+        return Err(Error::InvalidTonic(tonic.to_string()));
+    }
+
+    Ok(res)
 }
 
 #[cfg(test)]
