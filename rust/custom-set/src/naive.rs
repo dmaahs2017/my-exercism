@@ -3,13 +3,13 @@
 /// The Easy Naive Implementation
 #[derive(Debug)]
 pub struct NaiveSet<T> {
-    v: Vec<T>
+    v: Vec<T>,
 }
 
 impl<T: Clone + PartialEq> NaiveSet<T> {
     /// Naive Imple
     pub fn new(input: &[T]) -> Self {
-        Self {v: input.to_vec()}
+        Self { v: input.to_vec() }
     }
 
     /// Naive Impl: O(n)
@@ -43,7 +43,9 @@ impl<T: Clone + PartialEq> NaiveSet<T> {
     #[must_use]
     pub fn intersection(&self, other: &Self) -> Self {
         let mut new = Self::new(&[]);
-        self.v.iter().chain(other.v.iter())
+        self.v
+            .iter()
+            .chain(other.v.iter())
             .filter(|e| self.contains(e) && other.contains(e))
             .cloned()
             .for_each(|e| new.add(e));
@@ -55,7 +57,8 @@ impl<T: Clone + PartialEq> NaiveSet<T> {
     #[must_use]
     pub fn difference(&self, other: &Self) -> Self {
         let mut new = Self::new(&[]);
-        self.v.iter()
+        self.v
+            .iter()
             .filter(|e| !other.contains(e))
             .cloned()
             .for_each(|e| new.add(e));
@@ -67,7 +70,9 @@ impl<T: Clone + PartialEq> NaiveSet<T> {
     /// Naive Impl: O(n^2)
     pub fn union(&self, other: &Self) -> Self {
         let mut new = Self::new(&[]);
-        self.v.iter().chain(other.v.iter())
+        self.v
+            .iter()
+            .chain(other.v.iter())
             .cloned()
             .for_each(|e| new.add(e));
 

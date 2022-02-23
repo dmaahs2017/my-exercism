@@ -1,11 +1,11 @@
-use std::hash::{ Hash, Hasher };
+use std::hash::{Hash, Hasher};
 
 use std::collections::hash_map::DefaultHasher;
 
 /// The Fast implementation using hashing
 #[derive(Debug)]
 pub struct FastSet<T, const N: usize> {
-    v: Vec<Vec<T>>
+    v: Vec<Vec<T>>,
 }
 
 fn get_hashed_bucket<T: Hash>(e: &T, n: usize) -> usize {
@@ -14,12 +14,14 @@ fn get_hashed_bucket<T: Hash>(e: &T, n: usize) -> usize {
     s.finish() as usize % n
 }
 
-impl<T, const N: usize> FastSet<T, N> 
-where T: Clone + PartialEq + Hash
+impl<T, const N: usize> FastSet<T, N>
+where
+    T: Clone + PartialEq + Hash,
 {
-
     pub fn new(input: &[T]) -> Self {
-        let mut new = Self { v: vec![Vec::with_capacity(4); N] };
+        let mut new = Self {
+            v: vec![Vec::with_capacity(4); N],
+        };
 
         input.iter().cloned().for_each(|e| {
             new.add(e);
@@ -41,8 +43,7 @@ where T: Clone + PartialEq + Hash
     }
 
     pub fn is_subset(&self, other: &Self) -> bool {
-        self.iter()
-            .all(|e| other.iter().any(|e2| e == e2))
+        self.iter().all(|e| other.iter().any(|e2| e == e2))
     }
 
     pub fn is_empty(&self) -> bool {
@@ -50,14 +51,15 @@ where T: Clone + PartialEq + Hash
     }
 
     pub fn is_disjoint(&self, other: &Self) -> bool {
-        self.iter()
-            .all(|e| !other.iter().any(|e2| e == e2))
+        self.iter().all(|e| !other.iter().any(|e2| e == e2))
     }
 
     #[must_use]
     pub fn intersection(&self, other: &Self) -> Self {
         let mut new = Self::new(&[]);
-        self.iter().chain(other.iter()).cloned()
+        self.iter()
+            .chain(other.iter())
+            .cloned()
             .filter(|e| self.contains(e) && other.contains(e))
             .for_each(|e| new.add(e));
         new
@@ -66,7 +68,9 @@ where T: Clone + PartialEq + Hash
     #[must_use]
     pub fn difference(&self, other: &Self) -> Self {
         let mut new = Self::new(&[]);
-        self.iter().filter(|e| !other.contains(e)).cloned()
+        self.iter()
+            .filter(|e| !other.contains(e))
+            .cloned()
             .for_each(|e| new.add(e));
         new
     }
@@ -74,12 +78,14 @@ where T: Clone + PartialEq + Hash
     #[must_use]
     pub fn union(&self, other: &Self) -> Self {
         let mut new = Self::new(&[]);
-        self.iter().chain(other.iter()).cloned()
+        self.iter()
+            .chain(other.iter())
+            .cloned()
             .for_each(|e| new.add(e));
         new
     }
 
-    pub fn iter(&self) -> impl Iterator<Item=&T> {
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.v.iter().flatten()
     }
 }
@@ -101,7 +107,7 @@ mod tests {
         let mut hasher = DefaultHasher::new();
         x.hash(&mut hasher);
         let x_h = hasher.finish();
-        
+
         let mut hasher = DefaultHasher::new();
         y.hash(&mut hasher);
         let y_h = hasher.finish();
