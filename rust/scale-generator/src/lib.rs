@@ -46,16 +46,15 @@ fn string_to_note(note_str: &str) -> ScaleResult<Note> {
         _ => return Err(invalid_note_fn()),
     };
 
-    sum += if let Some(b) = byte_iter.next() {
+    if let Some(b) = byte_iter.next() {
         match b {
-            b'#' => 1,
-            b'b' => -1,
+            b'#' => sum += 1,
+            b'b' => sum -= 1,
             _ => return Err(invalid_note_fn()),
         }
-    } else {
-        0
-    };
+    }
 
+    // Should not have more than 2 characters. A note and its accent
     if byte_iter.next().is_some() {
         return Err(invalid_note_fn());
     }
