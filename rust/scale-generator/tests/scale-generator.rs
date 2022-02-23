@@ -96,8 +96,6 @@ fn test_minor_scale_with_flats() {
 #[test]
 /// Dorian mode
 fn test_dorian_mode() {
-    process_interval_case("d", "MmMMMmM", &["D", "E", "F", "G", "A", "B", "C", "D"]);
-}
 
 #[test]
 /// Mixolydian mode
